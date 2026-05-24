@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-window.onload = () => {
+export default() => {
     fetch(`/static/assets/${window.TILES_PATH}/tiles.json`)
         .then(r => r.json())
         .then(data => {
@@ -46,7 +46,7 @@ window.onload = () => {
             camera.position.z = 10;
 
             const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, premultipliedAlpha: false });
-            renderer.outputColorSpace = THREE.SRGBColorSpace;
+            // renderer.outputColorSpace = THREE.SRGBColorSpace;
             // renderer.toneMapping = THREE.NoToneMapping;
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);

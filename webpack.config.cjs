@@ -3,10 +3,10 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const { WebpackManifestPlugin } = require("webpack-manifest-plugin");
 
 module.exports = {
-  mode: "production", // minify + optimizations
+  mode: "production",
 
   entry: {
-    main: "./frontend/scripts/render.js",
+    main: "./frontend/scripts/main.ts",
     style: "./frontend/styles/main.scss",
   },
 
@@ -16,8 +16,18 @@ module.exports = {
     clean: false,
   },
 
+  resolve: {
+    extensions: [".ts", ".js"],
+  },
+
   module: {
     rules: [
+      {
+        test: /\.ts$/,
+        use: "ts-loader",
+        exclude: /node_modules/,
+      },
+
       {
         test: /\.(sa|sc|c)ss$/,
         use: [
@@ -37,16 +47,20 @@ module.exports = {
     new WebpackManifestPlugin({
       fileName: "manifest.json",
       publicPath: "/static/",
+
       generate: (seed, files) => {
         const manifest = {};
 
         files.forEach((file) => {
+
           if (file.name === "main.js") {
             manifest.js = file.path;
           }
+
           if (file.name === "style.css") {
             manifest.css = file.path;
           }
+
         });
 
         return manifest;

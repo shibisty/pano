@@ -2,13 +2,15 @@
   "name": "pano",
   "version": "0.0.1",
   "description": "Maps of games",
-  "main": "webpack.config.js",
+  "main": "webpack.config.cjs",
   "devDependencies": {
     "css-loader": "^7.1.4",
     "mini-css-extract-plugin": "^2.10.2",
     "sass": "^1.100.0",
     "sass-loader": "^17.0.0",
     "three": "^0.184.0",
+    "ts-loader": "^9.5.7",
+    "typescript": "^6.0.3",
     "webpack": "^5.107.1",
     "webpack-cli": "^7.0.2",
     "webpack-manifest-plugin": "^6.0.1"
@@ -20,6 +22,6 @@
     "start": "npm run prod"
   },
   "author": "Alexander Shibisty",
-  "license": "ISC",
+  "license": "MIT",
   "type": "module"
 }
