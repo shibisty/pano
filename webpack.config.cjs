@@ -7,7 +7,7 @@ module.exports = {
 
   entry: {
     main: "./frontend/scripts/render.js",
-    style: "./frontend/styles/main.css",
+    style: "./frontend/styles/main.scss",
   },
 
   output: {
@@ -19,8 +19,12 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, "css-loader"],
+        test: /\.(sa|sc|c)ss$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          "css-loader",
+          "sass-loader"
+        ],
       },
     ],
   },

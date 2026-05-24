@@ -46,3 +46,51 @@ This project is a lightweight map engine inspired by modern web mapping systems.
 Tiles are stored using the standard XYZ structure:
 
 ![Example Map](examples/screenshot_1.png)
+
+## 🚀 Deployment Guide
+
+### 1. Tile generation
+
+First, you need to generate map tiles.
+
+- Place your large map image into the `./tiler` directory.
+
+Then run one of the following commands:
+
+#### Windows
+```bash
+tiler.bat "map_name.{jpg,png,webp}" "new_folder_name"
+```
+
+#### Linux
+```bash
+./tiler.sh "map_name.{jpg,png,webp}" "new_folder_name"
+```
+
+After the tiles are generated, move the resulting folder into:
+
+```bash
+./public/assets
+```
+
+---
+
+### 2. Frontend build
+
+Install dependencies and build production assets:
+
+```bash
+npm install
+npm run prod
+```
+
+---
+
+### 3. Run the HTTP server
+
+Build and start the server:
+
+```bash
+go build
+./pano.exe
+```

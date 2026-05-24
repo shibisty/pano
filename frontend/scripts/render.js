@@ -182,7 +182,6 @@ window.onload = () => {
             // =====================================================
             // WHEEL ZOOM (TARGET)
             // =====================================================
-
             window.addEventListener("wheel", (e) => {
 
                 if (e.deltaY < 0) {
@@ -287,8 +286,8 @@ window.onload = () => {
                 camera.right = window.innerWidth / 2 + camX;
                 camera.top = window.innerHeight / 2 + camY;
                 camera.bottom = -window.innerHeight / 2 + camY;
-                camera.rotation.x = rotX;
-                camera.rotation.y = rotY;
+                // scene.rotation.x = rotX;
+                // scene.rotation.y = rotY;
 
                 camera.zoom = Math.pow(2, zoomCurrent);
 

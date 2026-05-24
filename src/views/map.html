@@ -1,8 +1,45 @@
-{{define "content"}}
-    <div class="gradient"></div>
+{{define "layout"}}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>{{.Title}}</title>
+        <link rel="stylesheet" href="{{.CSS}}">
+    </head>
+    <body>
 
-    <script>
-        window.TILES_PATH = '{{.Tiles_path}}';
-    </script>
-    <script src="{{.JS}}" defer></script>
+        <nav class="navigation">
+            <section class="navigation--header">
+
+            </section>
+
+            <section class="navigation--left-side">
+
+            </section>
+
+            <section class="navigation--right-side">
+
+            </section>
+
+            <section class="navigation--footer">
+                <ul>
+                    <li>
+                        <a href="https://upwork.com/freelancers/shibisty" target="_blank"><strong>Alexander Shibisty</strong></a>
+                    </li>
+                    <li>
+                        Powered by <strong>Luna Engine</strong>
+                    </li>
+                </ul>
+            </section>
+        </nav>
+
+        <div class="gradient"></div>
+
+        <script>
+            window.TILES_PATH = '{{.Tiles_path}}';
+        </script>
+        <script src="{{.JS}}" defer></script>
+
+    </body>
+</html>
 {{end}}
