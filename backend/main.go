@@ -35,7 +35,7 @@ type I18n map[string]string
 var manifest Manifest
 
 func loadManifest() {
-	data, err := os.ReadFile("public/manifest.json")
+	data, err := os.ReadFile("../public/manifest.json")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -149,7 +149,7 @@ func main() {
 
 	mux.Handle("/static/",
 		http.StripPrefix("/static/",
-			http.FileServer(http.Dir("public")),
+			http.FileServer(http.Dir("../public")),
 		),
 	)
 

@@ -1,4 +1,6 @@
-public/*
+public/assets/*
+public/scripts/*
+public/styles/*
 tiler/*
 !tiler/tiler.py
 !tiler/tiler.bat

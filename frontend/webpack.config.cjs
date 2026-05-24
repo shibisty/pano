@@ -6,13 +6,13 @@ module.exports = {
   mode: "production",
 
   entry: {
-    main: "./frontend/scripts/main.ts",
-    style: "./frontend/styles/main.scss",
+    main: "./src/scripts/main.ts",
+    style: "./src/styles/main.scss",
   },
 
   output: {
     filename: "scripts/[name].[contenthash].js",
-    path: path.resolve(__dirname, "public"),
+    path: path.resolve(__dirname, "../public"),
     clean: false,
   },
 

@@ -45,7 +45,7 @@ This project is a lightweight map engine inspired by modern web mapping systems.
 
 Tiles are stored using the standard XYZ structure:
 
-![Example Map](examples/screenshot_1.png)
+![Example Map](_examples/screenshot_1.png)
 
 ## 🚀 Deployment Guide
 
@@ -80,6 +80,7 @@ After the tiles are generated, move the resulting folder into:
 Install dependencies and build production assets:
 
 ```bash
+cd frontend
 npm install
 npm run prod
 ```
@@ -91,6 +92,7 @@ npm run prod
 Build and start the server:
 
 ```bash
+cd backend
 go build
 ./sme-http.exe
 ```
