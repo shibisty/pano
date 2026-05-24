@@ -1,324 +1,308 @@
 import * as THREE from "three";
 
-export default() => {
-    fetch(`/static/assets/${window.TILES_PATH}/tiles.json`)
-        .then(r => r.json())
-        .then(data => {
-            let TILE_INDEX = data;
+export default(data: any) => {
+    let TILE_INDEX = data;
 
-            let initialLoad = true;
-            let introProgress = 0;
-            // let lastPreloadZoom = null;
+    let initialLoad = true;
+    let introProgress = 0;
+    // let lastPreloadZoom = null;
 
-            // =====================================================
-            // CONFIG
-            // =====================================================
+    // =====================================================
+    // CONFIG
+    // =====================================================
 
-            const TILE_SIZE = 256;
+    const TILE_SIZE = 256;
 
-            let ZOOM = 0;
-            const MIN_ZOOM = 0;
-            const MAX_ZOOM = 5;
+    let ZOOM = 0;
+    const MIN_ZOOM = 0;
+    const MAX_ZOOM = 5;
 
-            // smooth zoom
-            let zoomTarget = 0;
-            let zoomCurrent = 0;
+    // smooth zoom
+    let zoomTarget = 0;
+    let zoomCurrent = 0;
 
-            // camera
-            let camX = 0;
-            let camY = 0;
+    // camera
+    let camX = 0;
+    let camY = 0;
 
-            // =====================================================
-            // THREE
-            // =====================================================
+    // =====================================================
+    // THREE
+    // =====================================================
 
-            const scene = new THREE.Scene();
+    const scene = new THREE.Scene();
 
-            const camera = new THREE.OrthographicCamera(
-                window.innerWidth / -2,
-                window.innerWidth / 2,
-                window.innerHeight / -2,
-                window.innerHeight / 2,
-                0.1,
-                10000
-            );
+    const camera = new THREE.OrthographicCamera(
+        window.innerWidth / -2,
+        window.innerWidth / 2,
+        window.innerHeight / -2,
+        window.innerHeight / 2,
+        0.1,
+        10000
+    );
 
-            camera.position.z = 10;
+    camera.position.z = 10;
 
-            const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, premultipliedAlpha: false });
-            // renderer.outputColorSpace = THREE.SRGBColorSpace;
-            // renderer.toneMapping = THREE.NoToneMapping;
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderer.domElement);
+    const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, premultipliedAlpha: false });
+    // renderer.outputColorSpace = THREE.SRGBColorSpace;
+    // renderer.toneMapping = THREE.NoToneMapping;
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-            // =====================================================
-            // LAYERS (ZOOM BLENDING)
-            // =====================================================
+    // =====================================================
+    // LAYERS (ZOOM BLENDING)
+    // =====================================================
 
-            const layers = {};
+    const layers = {};
 
-            function getLayer(z) {
+    function getLayer(z) {
 
-                if (!layers[z]) {
-                    layers[z] = {
-                        group: new THREE.Group(),
-                        cache: {}
-                    };
+        if (!layers[z]) {
+            layers[z] = {
+                group: new THREE.Group(),
+                cache: {}
+            };
 
-                    scene.add(layers[z].group);
-                }
+            scene.add(layers[z].group);
+        }
 
-                return layers[z];
+        return layers[z];
+    }
+
+    // =====================================================
+    // UTILS
+    // =====================================================
+
+    function key(x, y) {
+        return `${x}_${y}`;
+    }
+
+    function scaleForZoom(z) {
+        return Math.pow(2, z);
+    }
+
+    function preloadAroundZoom(z) {
+        for (let dz = -1; dz <= 1; dz++) {
+            updateLayer(z + dz, dz === 0 ? 1 : 0.2);
+        }
+    }
+
+    // =====================================================
+    // TILE LOAD
+    // =====================================================
+
+    function loadTile(dx, dy, z) {
+
+        if (!TILE_INDEX[z] ||
+            !TILE_INDEX[z][dx] ||
+            !TILE_INDEX[z][dx][dy]) {
+            return null;
+        }
+
+        const layer = getLayer(z);
+        const k = key(dx, dy);
+
+        if (layer.cache[k]) return layer.cache[k];
+
+        const tex = new THREE.TextureLoader().load(
+            `/static/assets/${window.TILES_PATH}/${z}/${dx}/${dy}.webp`
+        );
+
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.minFilter = THREE.NearestFilter;
+        tex.magFilter = THREE.NearestFilter;
+
+        const mesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(TILE_SIZE, TILE_SIZE),
+            new THREE.MeshBasicMaterial({
+                map: tex,
+                transparent: true,
+                opacity: 0
+            })
+        );
+
+        layer.group.add(mesh);
+        layer.cache[k] = mesh;
+
+        return mesh;
+    }
+
+    // =====================================================
+    // UPDATE LAYER
+    // =====================================================
+
+    function updateLayer(z, alpha) {
+
+        const layer = getLayer(z);
+
+        // const scale = scaleForZoom(z);
+        // const size = TILE_SIZE * scale;
+        const size = TILE_SIZE;
+
+        const hw = window.innerWidth / 2;
+        const hh = window.innerHeight / 2;
+
+        const left = camX - hw;
+        const right = camX + hw;
+        const top = camY + hh;
+        const bottom = camY - hh;
+
+        const startX = Math.floor(left / size) - 1;
+        const endX = Math.ceil(right / size) + 1;
+
+        const startY = Math.floor((-top) / size) - 1;
+        const endY = Math.ceil((-bottom) / size) + 1;
+
+        for (let dx = startX; dx <= endX; dx++) {
+            for (let dy = startY; dy <= endY; dy++) {
+
+                const tile = loadTile(dx, dy, z);
+
+                if (!tile) continue;
+
+                // tile.scale.set(scale, scale, 1);
+
+                // tile.position.x = dx * size;
+                // tile.position.y = -dy * size;
+
+                tile.scale.set(1, 1, 1);
+
+                tile.position.x = dx * size;
+                tile.position.y = -dy * size;
+
+                tile.visible = true;
+
+                tile.material.opacity = alpha;
             }
+        }
+    }
 
-            // =====================================================
-            // UTILS
-            // =====================================================
+    // =====================================================
+    // WHEEL ZOOM (TARGET)
+    // =====================================================
+    window.addEventListener("wheel", (e) => {
 
-            function key(x, y) {
-                return `${x}_${y}`;
-            }
-
-            function scaleForZoom(z) {
-                return Math.pow(2, z);
-            }
-
-            function preloadAroundZoom(z) {
-                for (let dz = -1; dz <= 1; dz++) {
-                    updateLayer(z + dz, dz === 0 ? 1 : 0.2);
-                }
-            }
-
-            // =====================================================
-            // TILE LOAD
-            // =====================================================
-
-            function loadTile(dx, dy, z) {
-
-                if (!TILE_INDEX[z] ||
-                    !TILE_INDEX[z][dx] ||
-                    !TILE_INDEX[z][dx][dy]) {
-                    return null;
-                }
-
-                const layer = getLayer(z);
-                const k = key(dx, dy);
-
-                if (layer.cache[k]) return layer.cache[k];
-
-                const tex = new THREE.TextureLoader().load(
-                    `/static/assets/${window.TILES_PATH}/${z}/${dx}/${dy}.webp`
-                );
-
-                tex.colorSpace = THREE.SRGBColorSpace;
-                tex.minFilter = THREE.NearestFilter;
-                tex.magFilter = THREE.NearestFilter;
-
-                const mesh = new THREE.Mesh(
-                    new THREE.PlaneGeometry(TILE_SIZE, TILE_SIZE),
-                    new THREE.MeshBasicMaterial({
-                        map: tex,
-                        transparent: true,
-                        opacity: 0
-                    })
-                );
-
-                layer.group.add(mesh);
-                layer.cache[k] = mesh;
-
-                return mesh;
-            }
-
-            // =====================================================
-            // UPDATE LAYER
-            // =====================================================
-
-            function updateLayer(z, alpha) {
-
-                const layer = getLayer(z);
-
-                // const scale = scaleForZoom(z);
-                // const size = TILE_SIZE * scale;
-                const size = TILE_SIZE;
-
-                const hw = window.innerWidth / 2;
-                const hh = window.innerHeight / 2;
-
-                const left = camX - hw;
-                const right = camX + hw;
-                const top = camY + hh;
-                const bottom = camY - hh;
-
-                const startX = Math.floor(left / size) - 1;
-                const endX = Math.ceil(right / size) + 1;
-
-                const startY = Math.floor((-top) / size) - 1;
-                const endY = Math.ceil((-bottom) / size) + 1;
-
-                for (let dx = startX; dx <= endX; dx++) {
-                    for (let dy = startY; dy <= endY; dy++) {
-
-                        const tile = loadTile(dx, dy, z);
-
-                        if (!tile) continue;
-
-                        // tile.scale.set(scale, scale, 1);
-
-                        // tile.position.x = dx * size;
-                        // tile.position.y = -dy * size;
-
-                        tile.scale.set(1, 1, 1);
-
-                        tile.position.x = dx * size;
-                        tile.position.y = -dy * size;
-
-                        tile.visible = true;
-
-                        tile.material.opacity = alpha;
-                    }
-                }
-            }
-
-            // =====================================================
-            // WHEEL ZOOM (TARGET)
-            // =====================================================
-            window.addEventListener("wheel", (e) => {
-
-                if (e.deltaY < 0) {
-                    zoomTarget = Math.min(MAX_ZOOM, zoomTarget + 1);
-                } else {
-                    zoomTarget = Math.max(MIN_ZOOM, zoomTarget - 1);
-                }
-            });
-
-            // =====================================================
-            // PAN
-            // =====================================================
-
-            let dragging = false;
-            let rotating = false;
-            let lastX = 0;
-            let lastY = 0;
-            let rotX = 0;
-            let rotY = 0;
-
-            window.addEventListener("mousedown", e => {
-                lastX = e.clientX;
-                lastY = e.clientY;
-                
-                if (e.shiftKey) {
-                    rotating = true;
-                } else {
-                    dragging = true;
-                }
-            });
-
-            window.addEventListener("mouseup", () => {
-                dragging = false;
-                rotating = false;
-            });
-
-            window.addEventListener("mousemove", e => {
-
-                if (!dragging && !rotating) {
-                    return;
-                }
-
-                // camX -= (e.clientX - lastX);
-                // camY += (e.clientY - lastY);
-
-                // lastX = e.clientX;
-                // lastY = e.clientY;
-                const dx = e.clientX - lastX;
-                const dy = e.clientY - lastY;
-
-                if (dragging) {
-                    camX -= dx;
-                    camY += dy;
-                }
-
-                if (rotating) {
-                    rotY += dx * 0.005;
-                    rotX += dy * 0.005;
-
-                    // ограничим наклон
-                    rotX = Math.max(-1.2, Math.min(1.2, rotX));
-                }
-
-                lastX = e.clientX;
-                lastY = e.clientY;
-            });
-
-            // =====================================================
-            // RENDER LOOP (ANIMATION MAGIC)
-            // =====================================================
-
-            function animate() {
-                requestAnimationFrame(animate);
-
-                // smooth zoom interpolation
-                zoomCurrent += (zoomTarget - zoomCurrent) * 0.1;
-
-                const zLow = Math.floor(zoomCurrent);
-                const zHigh = Math.min(MAX_ZOOM, zLow + 1);
-                const t = zoomCurrent - zLow;
-
-                if (initialLoad) {
-                    introProgress += 0.02;
-                    if (introProgress > 1) {
-                        introProgress = 1;
-                    }
-                }
-
-                let lowAlpha = 1 - t;
-                let highAlpha = t;
-
-                // intro fade override
-                if (initialLoad) {
-                    lowAlpha *= introProgress;
-                    highAlpha *= introProgress;
-                }
-
-                updateLayer(zLow, lowAlpha);
-                updateLayer(zHigh, highAlpha);
-
-                camera.left = -window.innerWidth / 2 + camX;
-                camera.right = window.innerWidth / 2 + camX;
-                camera.top = window.innerHeight / 2 + camY;
-                camera.bottom = -window.innerHeight / 2 + camY;
-                // scene.rotation.x = rotX;
-                // scene.rotation.y = rotY;
-
-                camera.zoom = Math.pow(2, zoomCurrent);
-
-                // const zSnap = Math.round(zoomCurrent);
-                // if (zSnap !== lastPreloadZoom) {
-                //     preloadAroundZoom(zSnap);
-                //     lastPreloadZoom = zSnap;
-                // }
-
-                camera.updateProjectionMatrix();
-                
-                renderer.render(scene, camera);
-                // initialLoad = false;
-            }
-
-            // =====================================================
-            // START
-            // =====================================================
-
-            animate();
-        });
-
-    document.querySelectorAll(".navigation--top-footer--button").forEach(link => {
-        const icons = link.querySelectorAll("svg");
-
-        icons.forEach(icon => {
-            icon.style.display = "none";
-        });
-
-        const randomIndex = Math.floor(Math.random() * icons.length);
-
-        icons[randomIndex].style.display = "inline-block";
+        if (e.deltaY < 0) {
+            zoomTarget = Math.min(MAX_ZOOM, zoomTarget + 1);
+        } else {
+            zoomTarget = Math.max(MIN_ZOOM, zoomTarget - 1);
+        }
     });
+
+    // =====================================================
+    // PAN
+    // =====================================================
+
+    let dragging = false;
+    let rotating = false;
+    let lastX = 0;
+    let lastY = 0;
+    let rotX = 0;
+    let rotY = 0;
+
+    window.addEventListener("mousedown", e => {
+        lastX = e.clientX;
+        lastY = e.clientY;
+        
+        if (e.shiftKey) {
+            rotating = true;
+        } else {
+            dragging = true;
+        }
+    });
+
+    window.addEventListener("mouseup", () => {
+        dragging = false;
+        rotating = false;
+    });
+
+    window.addEventListener("mousemove", e => {
+
+        if (!dragging && !rotating) {
+            return;
+        }
+
+        // camX -= (e.clientX - lastX);
+        // camY += (e.clientY - lastY);
+
+        // lastX = e.clientX;
+        // lastY = e.clientY;
+        const dx = e.clientX - lastX;
+        const dy = e.clientY - lastY;
+
+        if (dragging) {
+            camX -= dx;
+            camY += dy;
+        }
+
+        if (rotating) {
+            rotY += dx * 0.005;
+            rotX += dy * 0.005;
+
+            // ограничим наклон
+            rotX = Math.max(-1.2, Math.min(1.2, rotX));
+        }
+
+        lastX = e.clientX;
+        lastY = e.clientY;
+    });
+
+    // =====================================================
+    // RENDER LOOP (ANIMATION MAGIC)
+    // =====================================================
+
+    function animate() {
+        requestAnimationFrame(animate);
+
+        // smooth zoom interpolation
+        zoomCurrent += (zoomTarget - zoomCurrent) * 0.1;
+
+        const zLow = Math.floor(zoomCurrent);
+        const zHigh = Math.min(MAX_ZOOM, zLow + 1);
+        const t = zoomCurrent - zLow;
+
+        if (initialLoad) {
+            introProgress += 0.02;
+            if (introProgress > 1) {
+                introProgress = 1;
+            }
+        }
+
+        let lowAlpha = 1 - t;
+        let highAlpha = t;
+
+        // intro fade override
+        if (initialLoad) {
+            lowAlpha *= introProgress;
+            highAlpha *= introProgress;
+        }
+
+        updateLayer(zLow, lowAlpha);
+        updateLayer(zHigh, highAlpha);
+
+        camera.left = -window.innerWidth / 2 + camX;
+        camera.right = window.innerWidth / 2 + camX;
+        camera.top = window.innerHeight / 2 + camY;
+        camera.bottom = -window.innerHeight / 2 + camY;
+        // scene.rotation.x = rotX;
+        // scene.rotation.y = rotY;
+
+        camera.zoom = Math.pow(2, zoomCurrent);
+
+        // const zSnap = Math.round(zoomCurrent);
+        // if (zSnap !== lastPreloadZoom) {
+        //     preloadAroundZoom(zSnap);
+        //     lastPreloadZoom = zSnap;
+        // }
+
+        camera.updateProjectionMatrix();
+        
+        renderer.render(scene, camera);
+        // initialLoad = false;
+    }
+
+    // =====================================================
+    // START
+    // =====================================================
+
+    animate();
 }
