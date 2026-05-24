@@ -1,19 +1,15 @@
 import * as THREE from "three";
 
-export default(data: any) => {
-    let TILE_INDEX = data;
-
-    let initialLoad = true;
-    let introProgress = 0;
-    // let lastPreloadZoom = null;
-
+export default(tilesData: any) => {
     // =====================================================
     // CONFIG
     // =====================================================
 
+    let initialLoad = true;
+    let introProgress = 0;
+
     const TILE_SIZE = 256;
 
-    let ZOOM = 0;
     const MIN_ZOOM = 0;
     const MAX_ZOOM = 5;
 
@@ -26,7 +22,7 @@ export default(data: any) => {
     let camY = 0;
 
     // =====================================================
-    // THREE
+    // THREE INIT
     // =====================================================
 
     const scene = new THREE.Scene();
@@ -41,10 +37,12 @@ export default(data: any) => {
     );
 
     camera.position.z = 10;
-
-    const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, premultipliedAlpha: false });
-    // renderer.outputColorSpace = THREE.SRGBColorSpace;
-    // renderer.toneMapping = THREE.NoToneMapping;
+    const rendererParametres = {
+        antialias: false,
+        alpha: true,
+        premultipliedAlpha: false,
+    }
+    const renderer = new THREE.WebGLRenderer(rendererParametres);
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
@@ -55,7 +53,6 @@ export default(data: any) => {
     const layers = {};
 
     function getLayer(z) {
-
         if (!layers[z]) {
             layers[z] = {
                 group: new THREE.Group(),
@@ -92,9 +89,9 @@ export default(data: any) => {
 
     function loadTile(dx, dy, z) {
 
-        if (!TILE_INDEX[z] ||
-            !TILE_INDEX[z][dx] ||
-            !TILE_INDEX[z][dx][dy]) {
+        if (!tilesData[z] ||
+            !tilesData[z][dx] ||
+            !tilesData[z][dx][dy]) {
             return null;
         }
 
@@ -283,8 +280,8 @@ export default(data: any) => {
         camera.right = window.innerWidth / 2 + camX;
         camera.top = window.innerHeight / 2 + camY;
         camera.bottom = -window.innerHeight / 2 + camY;
-        // scene.rotation.x = rotX;
-        // scene.rotation.y = rotY;
+        // camera.rotation.x = rotX;
+        // camera.rotation.y = rotY;
 
         camera.zoom = Math.pow(2, zoomCurrent);
 

@@ -1,6 +1,7 @@
 public/assets/*
 public/scripts/*
 public/styles/*
+public/manifest.json
 tiler/*
 !tiler/tiler.py
 !tiler/tiler.bat
