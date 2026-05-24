@@ -37,7 +37,36 @@ canvas {
         left: 0px;
         right: 0px;
         height: 50px;
-        background: #fff;
+        background-color: rgba(0,0,0,.5);
+        text-align: center;
+
+        ul {
+            list-style-type: none;
+            display: inline-block;
+            padding: 0px;
+            margin: 0px;
+            height: 100%;
+
+            li {
+                display: inline-block;
+                text-align: left;
+                height: 100%;
+
+                input {
+                    height: 100%;
+                    border: none;
+                    background-color: rgba(0,0,0,.5);
+                    color: #fff;
+                    text-align: left;
+                    padding: 5px;
+                    padding-left: 10px;
+                    padding-right: 10px;
+                    font-size: 20px;
+                    outline: none;
+                    box-sizing: border-box;
+                }
+            }
+        }
     }
 
     .navigation--footer {
@@ -53,6 +82,7 @@ canvas {
         ul {
             list-style-type: none;
             display: inline-block;
+            padding: 0px;
 
             li {
                 display: inline-block;
@@ -66,23 +96,64 @@ canvas {
         }
     }
 
-    .navigation--left-side {
+    .navigation--top-footer {
         position: fixed;
         z-index: 10;
+        bottom: 60px;
+        left: 50px;
+        right: 0px;
+        height: 50px;
+        background: transparent;
+        text-align: right;
+
+        ul {
+            list-style-type: none;
+            display: inline-block;
+            padding: 0px;
+            margin: 0px;
+
+            li {
+                display: inline-block;
+                margin-right: 10px;
+                text-align: right;
+
+                .navigation--top-footer--button {
+                    width: 50px;
+                    height: 50px;
+                    background-color: #fff;
+                    border-radius: 5px;
+                    text-align: center;
+                    display: flex;
+                    align-items: center;      // вертикальный центр
+                    justify-content: center;  // горизонтальный центр
+
+                    svg {
+                        // display: inline-block;
+                        display: none;
+                        margin: auto;
+                    }
+                }
+            }
+        }
+    }
+
+    .navigation--left-side {
+        position: fixed;
+        z-index: 9;
         bottom: 50px;
         top: 50px;
-        left: 0px;
-        width: 50px;
+        left: -200px;
+        width: 200px;
         background: #fff;
     }
 
     .navigation--right-side {
         position: fixed;
-        z-index: 10;
+        z-index: 9;
         bottom: 50px;
         top: 50px;
-        right: 0px;
-        width: 50px;
+        right: -200px;
+        width: 200px;
         background: #fff;
     }
 }

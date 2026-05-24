@@ -309,4 +309,16 @@ window.onload = () => {
 
             animate();
         });
+
+    document.querySelectorAll(".navigation--top-footer--button").forEach(link => {
+        const icons = link.querySelectorAll("svg");
+
+        icons.forEach(icon => {
+            icon.style.display = "none";
+        });
+
+        const randomIndex = Math.floor(Math.random() * icons.length);
+
+        icons[randomIndex].style.display = "inline-block";
+    });
 }

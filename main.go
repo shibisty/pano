@@ -21,12 +21,16 @@ type PageData struct {
 	Tiles_path  string
 	JS    string
 	CSS   string
+	Lang       string
+	T          I18n
 }
 
 type Manifest struct {
 	JS  string `json:"js"`
 	CSS string `json:"css"`
 }
+
+type I18n map[string]string
 
 var manifest Manifest
 
@@ -38,7 +42,7 @@ func loadManifest() {
 	json.Unmarshal(data, &manifest)
 }
 
-func render(w http.ResponseWriter, tmpl string, data any) {
+func render(w http.ResponseWriter, tmpl string, data PageData) {
 	t, err := template.ParseFiles(
 		"src/views/layout.html",
 		"src/views/"+tmpl,
@@ -47,6 +51,9 @@ func render(w http.ResponseWriter, tmpl string, data any) {
 		http.Error(w, err.Error(), 500)
 		return
 	}
+
+	data.Lang = "en"
+	data.T = loadLocale(data.Lang)
 
 	err = t.ExecuteTemplate(w, "layout", data)
 	if err != nil {
@@ -70,6 +77,24 @@ func notFound(w http.ResponseWriter) {
 		JS:    manifest.JS,
 		CSS:   manifest.CSS,
 	})
+}
+
+func loadLocale(lang string) I18n {
+	filePath := "src/translations/" + lang + ".json"
+
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		// fallback на en
+		data, err = os.ReadFile("src/translations/en.json")
+		if err != nil {
+			log.Fatal("Cannot load default locale")
+		}
+	}
+
+	var dict I18n
+	json.Unmarshal(data, &dict)
+
+	return dict
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
