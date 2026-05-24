@@ -1,5 +1,5 @@
 {
-  "name": "pano",
+  "name": "simple-map-engine",
   "version": "0.0.1",
   "description": "Maps of games",
   "main": "webpack.config.cjs",

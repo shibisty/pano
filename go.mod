@@ -1,3 +1,3 @@
-module pano
+module sme-http
 
 go 1.26.3

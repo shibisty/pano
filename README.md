@@ -92,5 +92,5 @@ Build and start the server:
 
 ```bash
 go build
-./pano.exe
+./sme-http.exe
 ```
