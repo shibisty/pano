@@ -3,33 +3,52 @@ import os
 import json
 from collections import defaultdict
 import sys
+import re
 
-INPUT_IMAGES = [
-    'map_lod_1.png',
-    'map_lod_3.png',
-    'map_lod_5.png',
-    'map_lod_7.png',
-    'map_lod_9.png',
-]
+def find_lod_images(name):
+    prefix = f"{name}_lod"
+
+    images = []
+
+    pattern = re.compile(
+        rf"^{re.escape(prefix)}_(\d+)\.png$"
+    )
+
+    for file in os.listdir("."):
+
+        match = pattern.match(file)
+
+        if not match:
+            continue
+
+        index = int(match.group(1))
+
+        if index >= 1:
+            images.append((index, file))
+
+    images.sort(key=lambda x: x[0])
+
+    return [file for _, file in images]
 
 zoom_index = 0
 json_output = defaultdict(dict)
+json_output['tiles'] = {}
 
-for input_image in INPUT_IMAGES:
-    INPUT_IMAGE = input_image
+for input_image in find_lod_images(sys.argv[1]):
     OUTPUT_DIR = sys.argv[1]
     TILE_SIZE = 256
     ZOOM = zoom_index
     zoom_index += 1
 
     if ZOOM not in json_output:
-        json_output[ZOOM] = {}
+        json_output['tiles'][ZOOM] = {}
 
-    img = Image.open(INPUT_IMAGE).convert("RGBA")
+    img = Image.open(input_image).convert("RGBA")
     width, height = img.size
 
-    json_output[ZOOM]["width"] = width
-    json_output[ZOOM]["height"] = height
+    json_output['max_zoom'] = zoom_index
+    json_output['tiles'][ZOOM]["width"] = width
+    json_output['tiles'][ZOOM]["height"] = height
 
     center_x = width // 2
     center_y = height // 2
@@ -125,10 +144,10 @@ for input_image in INPUT_IMAGES:
         path = os.path.join(x_dir, f"{dy}.webp")
         tile.save(path, 'WEBP', quality=100)
 
-        if dx not in json_output[ZOOM]:
-            json_output[ZOOM][dx] = {}
+        if dx not in json_output['tiles'][ZOOM]:
+            json_output['tiles'][ZOOM][dx] = {}
 
-        json_output[ZOOM][dx][dy] = path.replace("\\", "/")
+        json_output['tiles'][ZOOM][dx][dy] = path.replace("\\", "/")
 
         print(f"tile {dx},{dy}, {path}")
 

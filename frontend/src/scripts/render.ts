@@ -5,13 +5,15 @@ export default(tilesData: any) => {
     // CONFIG
     // =====================================================
 
+    const tiles = tilesData.tiles;
+
     let initialLoad = true;
     let introProgress = 0;
 
     const TILE_SIZE = 256;
 
     const MIN_ZOOM = 0;
-    const MAX_ZOOM = 5;
+    const MAX_ZOOM = tilesData.max_zoom - 1;
 
     // smooth zoom
     let zoomTarget = 0;
@@ -44,6 +46,8 @@ export default(tilesData: any) => {
     }
     const renderer = new THREE.WebGLRenderer(rendererParametres);
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x000000, 0);
+    renderer.autoClear = true;
     document.body.appendChild(renderer.domElement);
 
     // =====================================================
@@ -88,17 +92,18 @@ export default(tilesData: any) => {
     // =====================================================
 
     function loadTile(dx, dy, z) {
-
-        if (!tilesData[z] ||
-            !tilesData[z][dx] ||
-            !tilesData[z][dx][dy]) {
+        if (!tiles[z] ||
+            !tiles[z][dx] ||
+            !tiles[z][dx][dy]) {
             return null;
         }
 
         const layer = getLayer(z);
         const k = key(dx, dy);
 
-        if (layer.cache[k]) return layer.cache[k];
+        if (layer.cache[k]) {
+            return layer.cache[k];
+        }
 
         const tex = new THREE.TextureLoader().load(
             `/static/assets/${window.TILES_PATH}/${z}/${dx}/${dy}.webp`
@@ -113,6 +118,8 @@ export default(tilesData: any) => {
             new THREE.MeshBasicMaterial({
                 map: tex,
                 transparent: true,
+                depthWrite: true,
+                depthTest: true,
                 opacity: 0
             })
         );
@@ -128,8 +135,12 @@ export default(tilesData: any) => {
     // =====================================================
 
     function updateLayer(z, alpha) {
-
         const layer = getLayer(z);
+
+        // for (const key in layer.cache) {
+        //     const mesh = layer.cache[key];
+        //     mesh.visible = false;
+        // }
 
         // const scale = scaleForZoom(z);
         // const size = TILE_SIZE * scale;
@@ -149,6 +160,8 @@ export default(tilesData: any) => {
         const startY = Math.floor((-top) / size) - 1;
         const endY = Math.ceil((-bottom) / size) + 1;
 
+        const currentActive = new Set<string>();
+
         for (let dx = startX; dx <= endX; dx++) {
             for (let dy = startY; dy <= endY; dy++) {
 
@@ -161,14 +174,23 @@ export default(tilesData: any) => {
                 // tile.position.x = dx * size;
                 // tile.position.y = -dy * size;
 
+                const k = key(dx, dy);
+                currentActive.add(k);
+
                 tile.scale.set(1, 1, 1);
 
                 tile.position.x = dx * size;
                 tile.position.y = -dy * size;
-
                 tile.visible = true;
-
                 tile.material.opacity = alpha;
+                // tile.material.transparent = true;
+                // tile.material.alphaTest = 0.5;
+            }
+        }
+
+        for (const k in layer.cache) {
+            if (!currentActive.has(k)) {
+                layer.cache[k].visible = false;
             }
         }
     }
@@ -177,7 +199,6 @@ export default(tilesData: any) => {
     // WHEEL ZOOM (TARGET)
     // =====================================================
     window.addEventListener("wheel", (e) => {
-
         if (e.deltaY < 0) {
             zoomTarget = Math.min(MAX_ZOOM, zoomTarget + 1);
         } else {
@@ -273,8 +294,12 @@ export default(tilesData: any) => {
             highAlpha *= introProgress;
         }
 
-        updateLayer(zLow, lowAlpha);
-        updateLayer(zHigh, highAlpha);
+        if (zLow === zHigh) {
+            updateLayer(zLow, lowAlpha);
+        } else {
+            updateLayer(zLow, lowAlpha);
+            updateLayer(zHigh, highAlpha);
+        }
 
         camera.left = -window.innerWidth / 2 + camX;
         camera.right = window.innerWidth / 2 + camX;
@@ -293,6 +318,7 @@ export default(tilesData: any) => {
 
         camera.updateProjectionMatrix();
         
+        // renderer.clear();
         renderer.render(scene, camera);
         // initialLoad = false;
     }

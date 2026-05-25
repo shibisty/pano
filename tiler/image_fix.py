@@ -1,6 +1,7 @@
 from PIL import Image
 import sys
 import os
+import math
 
 SIZE_INCREMENT = 512
 BASE_SIZE = 1280 - SIZE_INCREMENT
@@ -23,7 +24,19 @@ def remove_green_screen(img):
 
     return img
 
-def make_lods(input_path, output_dir, output_prefix="map"):
+def get_max_zoom_index(img):
+    index = 1
+    width, height = img.size
+    min_size = BASE_SIZE + SIZE_INCREMENT
+
+    if (width <= min_size) and (height <= min_size):
+        return index
+
+    biggest_side_size = max(width, height)
+
+    return math.ceil((biggest_side_size - BASE_SIZE) / SIZE_INCREMENT) + 1
+
+def make_lods(input_path, output_prefix):
 
     img = Image.open(input_path).convert("RGBA")
     img = remove_green_screen(img)
@@ -32,10 +45,10 @@ def make_lods(input_path, output_dir, output_prefix="map"):
     # SAVE ORIGINAL
     # =====================================================
 
-    os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(output_prefix, exist_ok=True)
 
     original = img.copy()
-    original.save(f"{output_dir}/original.webp", "WEBP", quality=100)
+    original.save(f"{output_prefix}/original.webp", "WEBP", quality=100)
 
     print("saved original.webp")
 
@@ -50,8 +63,8 @@ def make_lods(input_path, output_dir, output_prefix="map"):
     # LODS
     # =====================================================
 
-    for i in [1, 3, 5, 7, 9]:
-
+    print(get_max_zoom_index(img))
+    for i in list(range(1, get_max_zoom_index(img) + 1)):
         increment = SIZE_INCREMENT * i
         target_size = BASE_SIZE + increment
 
@@ -102,7 +115,7 @@ def make_lods(input_path, output_dir, output_prefix="map"):
 if __name__ == "__main__":
 
     if len(sys.argv) < 3:
-        print("usage: python lod.py image.png output_dir")
+        print("usage: python lod.py image.png output_prefix")
         sys.exit(1)
 
     make_lods(sys.argv[1], sys.argv[2])
