@@ -12,3 +12,4 @@ package-lock.json
 !.gitkeep
 pano/*
 !pano/pano.py
+!pano/pano.bat
