@@ -1,0 +1,238 @@
+{{define "layout"}}
+<!DOCTYPE html>
+<html lang="{{ .Lang }}">
+    <head>
+        <meta charset="utf-8" />
+        <title>{{.Title}}</title>
+        <link rel="stylesheet" href="{{.CSS}}">
+         <meta name="viewport" content="width=device-width, initial-scale=1, 
+          maximum-scale=1, user-scalable=no">
+    </head>
+    <body>
+
+        <script type="module">
+
+        import * as THREE from "https://unpkg.com/three@0.165.0/build/three.module.js";
+
+
+        // =========================================
+        // CONFIG
+        // =========================================
+
+        const TILE_SIZE = 512;
+
+        const COLS = 18;   // 9216 / 512
+        const ROWS = 9;    // 4608 / 512
+
+        const TILE_PATH = "/static/assets/cs16pano";
+
+
+        // =========================================
+        // SCENE
+        // =========================================
+
+        const scene = new THREE.Scene();
+
+        const camera = new THREE.PerspectiveCamera(
+            75,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            2000
+        );
+
+        camera.position.set(0, 0, 0.1);
+
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true
+        });
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+
+        // =========================================
+        // SPHERE (IMPORTANT FIX)
+        // =========================================
+
+        const geometry = new THREE.SphereGeometry(500, 64, 64);
+        geometry.scale(-1, 1, 1);
+
+        const material = new THREE.MeshBasicMaterial({
+            color: 0xffffff
+        });
+
+        const sphere = new THREE.Mesh(geometry, material);
+        scene.add(sphere);
+
+
+        // =========================================
+        // TILE CANVAS (STITCHING FIX)
+        // =========================================
+
+        const canvas = document.createElement("canvas");
+        canvas.width = COLS * TILE_SIZE;
+        canvas.height = ROWS * TILE_SIZE;
+
+        const ctx = canvas.getContext("2d");
+
+        const finalTexture = new THREE.CanvasTexture(canvas);
+        finalTexture.colorSpace = THREE.SRGBColorSpace;
+
+        sphere.material.map = finalTexture;
+
+
+        // =========================================
+        // LOAD TILES
+        // =========================================
+
+        const loader = new Image();
+
+        function loadTile(x, y) {
+
+            return new Promise((resolve) => {
+
+                const img = new Image();
+
+                img.src = `${TILE_PATH}/${x}_${y}.webp`;
+
+                img.onload = () => {
+
+                    ctx.drawImage(
+                        img,
+                        x * TILE_SIZE,
+                        y * TILE_SIZE
+                    );
+
+                    finalTexture.needsUpdate = true;
+
+                    resolve();
+                };
+
+            });
+        }
+
+
+        // =========================================
+        // LOAD ALL TILES
+        // =========================================
+
+        async function loadAll() {
+
+            for (let y = 0; y < ROWS; y++) {
+                for (let x = 0; x < COLS; x++) {
+
+                    await loadTile(x, y);
+
+                    console.log(`Loaded ${x}_${y}`);
+                }
+            }
+
+            console.log("All tiles loaded");
+        }
+
+        loadAll();
+
+
+        // =========================================
+        // CONTROLS
+        // =========================================
+
+        let lon = 180;
+        let lat = 0;
+
+        let dragging = false;
+
+        let lastX = 0;
+        let lastY = 0;
+
+        let minFov = 60;
+        let maxFov = 110;
+
+        window.addEventListener("mousedown", e => {
+            dragging = true;
+            lastX = e.clientX;
+            lastY = e.clientY;
+        });
+
+        window.addEventListener("mouseup", () => {
+            dragging = false;
+        });
+
+        window.addEventListener("mousemove", e => {
+
+            if (!dragging) return;
+
+            lon -= (e.clientX - lastX) * 0.1;
+            lat += (e.clientY - lastY) * 0.1;
+
+            lat = Math.max(-85, Math.min(85, lat));
+
+            lastX = e.clientX;
+            lastY = e.clientY;
+        });
+
+        window.addEventListener("wheel", (e) => {
+
+            camera.fov += e.deltaY * 0.05;
+
+            camera.fov = THREE.MathUtils.clamp(
+                camera.fov,
+                minFov,
+                maxFov
+            );
+
+            camera.updateProjectionMatrix();
+        });
+
+
+        // =========================================
+        // RENDER LOOP
+        // =========================================
+
+        function animate() {
+
+            requestAnimationFrame(animate);
+
+            lon += 0.05;
+
+            const phi =
+                THREE.MathUtils.degToRad(90 - lat);
+
+            const theta =
+                THREE.MathUtils.degToRad(lon);
+
+            camera.lookAt(
+                500 * Math.sin(phi) * Math.cos(theta),
+                500 * Math.cos(phi),
+                500 * Math.sin(phi) * Math.sin(theta)
+            );
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+
+        // =========================================
+        // RESIZE
+        // =========================================
+
+        window.addEventListener("resize", () => {
+
+            camera.aspect =
+                window.innerWidth /
+                window.innerHeight;
+
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(
+                window.innerWidth,
+                window.innerHeight
+            );
+        });
+
+        </script>
+
+    </body>
+</html>
+{{end}}

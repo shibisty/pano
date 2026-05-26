@@ -14,6 +14,7 @@ var templates = template.Must(template.ParseFiles(
 	"src/views/index.html",
 	"src/views/about.html",
 	"src/views/map.html",
+	"src/views/pano.html",
 ))
 
 type PageData struct {
@@ -113,6 +114,14 @@ func aboutHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func panoHandler(w http.ResponseWriter, r *http.Request) {
+	render(w, "pano.html", PageData{
+		Title: "Панорама",
+		JS:    manifest.JS,
+		CSS:   manifest.CSS,
+	})
+}
+
 func slugHandler(w http.ResponseWriter, r *http.Request) {
 	slug := strings.TrimPrefix(r.URL.Path, "/")
 	if slug == "" {
@@ -142,6 +151,8 @@ func main() {
 				indexHandler(w, r)
 			case "/about":
 				aboutHandler(w, r)
+			case "/pano":
+				panoHandler(w, r)
 			default:
 				slugHandler(w, r)
 		}
