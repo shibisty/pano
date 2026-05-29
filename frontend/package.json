@@ -4,24 +4,41 @@
   "description": "Maps of games",
   "main": "webpack.config.cjs",
   "devDependencies": {
+    "@babel/core": "^7.29.7",
+    "@babel/preset-env": "^7.29.7",
+    "@babel/preset-react": "^7.29.7",
+    "@babel/preset-typescript": "^7.29.7",
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3",
+    "babel-loader": "^10.1.1",
+    "copy-webpack-plugin": "^14.0.0",
     "css-loader": "^7.1.4",
+    "html-webpack-plugin": "^5.6.7",
     "mini-css-extract-plugin": "^2.10.2",
     "sass": "^1.100.0",
     "sass-loader": "^17.0.0",
-    "three": "^0.184.0",
     "ts-loader": "^9.5.7",
     "typescript": "^6.0.3",
-    "webpack": "^5.107.1",
+    "webpack": "^5.107.2",
     "webpack-cli": "^7.0.2",
-    "webpack-manifest-plugin": "^6.0.1"
+    "webpack-manifest-plugin": "^6.0.1",
+    "webpack-node-externals": "^3.0.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "prod": "npx webpack --config webpack.config.cjs --mode production",
-    "dev": "npx webpack --config webpack.config.cjs --watch --mode development",
+    "dev": "npx webpack --config webpack.config.cjs --mode development",
+    "server": "npx webpack --config webpack.server.cjs --watch --mode development",
     "start": "npm run prod"
   },
   "author": "Alexander Shibisty",
   "license": "MIT",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.12.0",
+    "react": "^19.2.6",
+    "react-redux": "^9.3.0",
+    "react-router-dom": "^7.15.1",
+    "three": "^0.184.0"
+  }
 }

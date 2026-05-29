@@ -1,6 +1,9 @@
 import * as THREE from "three";
 
-export default(tilesData: any) => {
+export default(mapName: any, tilesData: any, container: any) => {
+    if(!tilesData) {
+        return;
+    }
     // =====================================================
     // CONFIG
     // =====================================================
@@ -48,7 +51,7 @@ export default(tilesData: any) => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0x000000, 0);
     renderer.autoClear = true;
-    document.body.appendChild(renderer.domElement);
+    container.appendChild(renderer.domElement);
 
     // =====================================================
     // LAYERS (ZOOM BLENDING)
@@ -106,7 +109,7 @@ export default(tilesData: any) => {
         }
 
         const tex = new THREE.TextureLoader().load(
-            `/static/assets/${window.TILES_PATH}/${z}/${dx}/${dy}.webp`
+            `/assets/maps/${mapName}/${z}/${dx}/${dy}.webp`
         );
 
         tex.colorSpace = THREE.SRGBColorSpace;
@@ -305,6 +308,10 @@ export default(tilesData: any) => {
         camera.right = window.innerWidth / 2 + camX;
         camera.top = window.innerHeight / 2 + camY;
         camera.bottom = -window.innerHeight / 2 + camY;
+        container.style.transform = `
+            rotateX(${rotX}rad)
+            rotateY(${rotY}rad)
+        `
         // camera.rotation.x = rotX;
         // camera.rotation.y = rotY;
 

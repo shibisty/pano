@@ -1,84 +1,19 @@
 package main
 
 import (
-	"html/template"
+	"encoding/json"
 	"log"
 	"net/http"
-	"strings"
 	"os"
-	"encoding/json"
 )
 
-var templates = template.Must(template.ParseFiles(
-	"src/views/layout.html",
-	"src/views/index.html",
-	"src/views/about.html",
-	"src/views/map.html",
-	"src/views/pano.html",
-))
-
-type PageData struct {
-	Title string
-	Tiles_path  string
-	JS    string
-	CSS   string
-	Lang       string
-	T          I18n
-}
-
-type Manifest struct {
-	JS  string `json:"js"`
-	CSS string `json:"css"`
+type Response struct {
+	Page       string `json:"page"`
+	Title      string `json:"title"`
+	TilesPath  string `json:"tiles_path,omitempty"`
 }
 
 type I18n map[string]string
-
-var manifest Manifest
-
-func loadManifest() {
-	data, err := os.ReadFile("../public/manifest.json")
-	if err != nil {
-		log.Fatal(err)
-	}
-	json.Unmarshal(data, &manifest)
-}
-
-func render(w http.ResponseWriter, tmpl string, data PageData) {
-	t, err := template.ParseFiles(
-		"src/views/layout.html",
-		"src/views/"+tmpl,
-	)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-
-	data.Lang = "en"
-	data.T = loadLocale(data.Lang)
-
-	err = t.ExecuteTemplate(w, "layout", data)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-}
-
-func notFound(w http.ResponseWriter) {
-	t, err := template.ParseFiles(
-		"src/views/layout.html",
-		"src/views/404.html",
-	)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-
-	t.ExecuteTemplate(w, "layout", PageData{
-		Title: "404 - Page Not Found",
-		JS:    manifest.JS,
-		CSS:   manifest.CSS,
-	})
-}
 
 func loadLocale(lang string) I18n {
 	filePath := "src/translations/" + lang + ".json"
@@ -98,72 +33,54 @@ func loadLocale(lang string) I18n {
 	return dict
 }
 
+func jsonResponse(w http.ResponseWriter, data any) {
+	w.Header().Set("Content-Type", "application/json")
+
+	err := json.NewEncoder(w).Encode(data)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+	}
+}
+
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	render(w, "index.html", PageData{
-		Title: "Главная",
-		JS:    manifest.JS,
-		CSS:   manifest.CSS,
-	})
+	Lang := "en"
+	T := loadLocale(Lang)
+
+	jsonResponse(w, Response{
+		Page:  "home",
+		Title: T["home"],
+	})s
 }
 
 func aboutHandler(w http.ResponseWriter, r *http.Request) {
-	render(w, "about.html", PageData{
-		Title: "О сайте",
-		JS:    manifest.JS,
-		CSS:   manifest.CSS,
-	})
-}
+	Lang := "en"
+	T := loadLocale(Lang)
 
-func panoHandler(w http.ResponseWriter, r *http.Request) {
-	render(w, "pano.html", PageData{
-		Title: "Панорама",
-		JS:    manifest.JS,
-		CSS:   manifest.CSS,
-	})
-}
-
-func slugHandler(w http.ResponseWriter, r *http.Request) {
-	slug := strings.TrimPrefix(r.URL.Path, "/")
-	if slug == "" {
-		http.NotFound(w, r)
-		return
-	}
-
-	render(w, "map.html", PageData{
-		Title: "WebGL Tile Map",
-		JS:    manifest.JS,
-		CSS:   manifest.CSS,
-		Tiles_path:  slug,
+	jsonResponse(w, Response{
+		Page:  "about",
+		Title: T["about"],
 	})
 }
 
 func main() {
 	mux := http.NewServeMux()
 
-	loadManifest()
-
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+
 		path := r.URL.Path
+
 		log.Printf("Request: %s %s", r.Method, path)
 
 		switch path {
 			case "/":
 				indexHandler(w, r)
+
 			case "/about":
 				aboutHandler(w, r)
-			case "/pano":
-				panoHandler(w, r)
-			default:
-				slugHandler(w, r)
 		}
 	})
 
-	mux.Handle("/static/",
-		http.StripPrefix("/static/",
-			http.FileServer(http.Dir("../public")),
-		),
-	)
-
 	log.Println("Server: http://localhost:8000")
+
 	log.Fatal(http.ListenAndServe(":8000", mux))
 }

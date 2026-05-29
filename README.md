@@ -53,7 +53,7 @@ Tiles are stored using the standard XYZ structure:
 
 First, you need to generate map tiles.
 
-- Place your large map image into the `./tiler` directory.
+- Place your large map image into the `./utils/tiler` directory.
 
 Then run one of the following commands:
 
@@ -82,7 +82,13 @@ Install dependencies and build production assets:
 ```bash
 cd frontend
 npm install
-npm run prod
+npm run dev
+```
+
+Example of http server:
+```bash
+cd public
+python -m http.server 3000
 ```
 
 ---
