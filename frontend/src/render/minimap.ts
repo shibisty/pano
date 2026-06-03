@@ -10,7 +10,7 @@ export default(mapName: any, tilesData: any, container: any) => {
 
     const tiles = tilesData.tiles;
 
-    let initialLoad = true;
+    const initialLoad = true;
     let introProgress = 0;
 
     const TILE_SIZE = 256;
@@ -23,8 +23,8 @@ export default(mapName: any, tilesData: any, container: any) => {
     let zoomCurrent = 0;
 
     // camera
-    let camX = 0;
-    let camY = 0;
+    const camX = 0;
+    const camY = 0;
 
     // =====================================================
     // THREE INIT
@@ -217,12 +217,12 @@ export default(mapName: any, tilesData: any, container: any) => {
     // PAN
     // =====================================================
 
-    let dragging = false;
-    let rotating = false;
-    let lastX = 0;
-    let lastY = 0;
-    let rotX = 0;
-    let rotY = 0;
+    const dragging = false;
+    const rotating = false;
+    const lastX = 0;
+    const lastY = 0;
+    const rotX = 0;
+    const rotY = 0;
 
     // window.addEventListener("mousedown", (event) => {
     //     lastX = event.clientX;

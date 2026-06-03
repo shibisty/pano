@@ -127,16 +127,16 @@ export default (panoName: any, tilesData: any, container: any) => {
     // =========================================
 
     let lon = 180;
-    let lat = 0;
+    const lat = 0;
 
-    let dragging = false;
-    let rotating = true;
+    const dragging = false;
+    const rotating = true;
 
-    let lastX = 0;
-    let lastY = 0;
+    const lastX = 0;
+    const lastY = 0;
 
-    let minFov = 40;
-    let maxFov = 100;
+    const minFov = 40;
+    const maxFov = 100;
 
     // window.addEventListener("mousedown", e => {
     //     dragging = true;

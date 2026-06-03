@@ -10,7 +10,7 @@ export default(mapName: any, tilesData: any, container: any) => {
 
     const tiles = tilesData.tiles;
 
-    let initialLoad = true;
+    const initialLoad = true;
     let introProgress = 0;
 
     const TILE_SIZE = 256;

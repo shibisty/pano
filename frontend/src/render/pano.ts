@@ -131,8 +131,8 @@ export default (panoName: any, tilesData: any, container: any) => {
     let lastX = 0;
     let lastY = 0;
 
-    let minFov = 40;
-    let maxFov = 100;
+    const minFov = 40;
+    const maxFov = 100;
 
     window.addEventListener("mousedown", e => {
         dragging = true;
