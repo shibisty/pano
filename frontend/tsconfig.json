@@ -11,5 +11,6 @@
     "forceConsistentCasingInFileNames": true,
     "ignoreDeprecations": "6.0"
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["webpack"]
 }

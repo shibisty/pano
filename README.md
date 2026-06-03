@@ -47,6 +47,8 @@ Tiles are stored using the standard XYZ structure:
 
 ![Example Map](_examples/screenshot_1.png)
 
+![Example Pano](_examples/screenshot_2.png)
+
 ## 🚀 Deployment Guide
 
 ### 1. Tile generation
@@ -56,6 +58,10 @@ First, you need to generate map tiles.
 - Place your large map image into the `./utils/tiler` directory.
 
 Then run one of the following commands:
+
+```bash
+cp .env.local .env
+```
 
 #### Windows
 ```bash
@@ -86,9 +92,15 @@ npm run dev
 ```
 
 Example of http server:
+1.
 ```bash
 cd public
 python -m http.server 3000
+```
+
+2.
+```bash
+docker-compose up --build
 ```
 
 ---

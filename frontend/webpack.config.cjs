@@ -1,25 +1,33 @@
 const path = require("path");
+const dotenv = require('dotenv');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const { WebpackManifestPlugin } = require("webpack-manifest-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const developmentConfig = require("./webpack/webpack.development");
+const productionConfig = require("./webpack/webpack.production");
+const merge = require("lodash/merge");
+const iconsManifest = require("./assets/icons/manifest.json");
 
-module.exports = {
-  mode: "production",
+const env = dotenv.config({
+  path: path.resolve(__dirname, '../.env')
+}).parsed || {};
 
+Object.keys(env).reduce((prev, key) => {
+    prev[`process.env.${key}`] = JSON.stringify(env[key]);
+    return prev;
+}, {});
+
+const config = {
   entry: "./src/index.tsx",
-
   output: {
-    path: path.resolve(__dirname, "../public"),
+    path: path.resolve(__dirname, "../public/static"),
     filename: "scripts/[name].[contenthash].js",
-    publicPath: "/",
-    clean: false,
+    publicPath: "/static/",
   },
-
   resolve: {
     extensions: [".ts", ".js", ".jsx", ".tsx"],
   },
-
   module: {
     rules: [
       {
@@ -49,44 +57,20 @@ module.exports = {
           "sass-loader"
         ],
       },
-
-      {
-        test: /\.(png|jpg|jpeg|gif|svg|webp)$/i,
-        type: "asset/resource",
-        generator: {
-          filename: "assets/images/[name].[ext]"
-        }
-      },
-
-      // {
-      //   test: /\.(png|jpg|jpeg|gif|svg|webp)$/i,
-      //   type: "asset/resource",
-      //   generator: {
-      //     filename: "assets/images/[name].[ext]"
-      //   }
-      // },
-
-      {
-        test: /\.(woff|woff2|ttf|eot)$/i,
-        type: "asset/resource",
-        generator: {
-          filename: "assets/fonts/[name].[ext]"
-        }
-      }
     ],
   },
-
   plugins: [
     new MiniCssExtractPlugin({
       filename: "styles/[name].[contenthash].css",
     }),
-
     new WebpackManifestPlugin({
-      fileName: "manifest.json",
-      publicPath: "/",
-
+      fileName: "../manifest.json",
+      publicPath: "/static/",
       generate: (seed, files) => {
-        const manifest = {};
+        const manifest = {
+          name: iconsManifest.name,
+          icons: iconsManifest.icons,
+        };
 
         files.forEach((file) => {
 
@@ -94,7 +78,7 @@ module.exports = {
             manifest.js = file.path;
           }
 
-          if (file.name === "style.css") {
+          if (file.name === "main.css") {
             manifest.css = file.path;
           }
 
@@ -103,22 +87,66 @@ module.exports = {
         return manifest;
       },
     }),
-
     new CopyWebpackPlugin({
       patterns: [
         {
           from: "assets/icons",
-          to: "../public/assets/icons"
+          to: "icons",
+          filter: (resourcePath) => {
+            const allowed = ['.png', '.ico'];
+            return allowed.some(ext => resourcePath.endsWith(ext));
+          },
         }
       ]
     }),
-
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: "assets/icons",
+          to: "../",
+          filter: (resourcePath) => {
+            const allowed = ['.xml'];
+            return allowed.some(ext => resourcePath.endsWith(ext));
+          },
+        }
+      ]
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: "assets/images",
+          to: "images",
+          filter: (resourcePath) => {
+            const allowed = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp'];
+            return allowed.some(ext => resourcePath.endsWith(ext));
+          },
+        }
+      ]
+    }),
+    // new CopyWebpackPlugin({
+    //   patterns: [
+    //     {
+    //       from: "assets/fonts",
+    //       to: "fonts",
+    //       filter: (resourcePath) => {
+    //         const allowed = ['.woff', '.woff2', '.ttf', '.eot'];
+    //         return allowed.some(ext => resourcePath.endsWith(ext));
+    //       },
+    //     }
+    //   ]
+    // }),
     new HtmlWebpackPlugin({
-      template: "./index.html"
+      template: "./index.html",
+      filename: "../index.html",
     }),
   ],
-
-  watch: true,
-
-  devtool: false,
 };
+
+let modeConfig = {};
+if (process.env.NODE_ENV === "production") {
+  modeConfig = merge({}, config, productionConfig.default);
+} else {
+  modeConfig = merge({}, config, developmentConfig.default);
+}
+
+module.exports = modeConfig;

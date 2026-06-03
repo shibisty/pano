@@ -142,7 +142,7 @@ for input_image in find_lod_images(sys.argv[1]):
         os.makedirs(x_dir, exist_ok=True)
 
         path = os.path.join(x_dir, f"{dy}.webp")
-        tile.save(path, 'WEBP', quality=100)
+        tile.save(path, 'WEBP', quality=100, method=6)
 
         if dx not in json_output['tiles'][ZOOM]:
             json_output['tiles'][ZOOM][dx] = {}

@@ -13,10 +13,6 @@ export default function Header() {
           About Us
         </Link>
 
-        <Link to="/pano" style={{ marginRight: 12 }}>
-          Pano
-        </Link>
-
         <Link to="/cs16">
           Map
         </Link>

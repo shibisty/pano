@@ -1,0 +1,9 @@
+version: "3.9"
+
+services:
+  web:
+    build: .
+    container_name: sme-nginx
+    ports:
+      - "3000:80"
+    restart: unless-stopped

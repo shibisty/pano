@@ -30,13 +30,16 @@ export default(mapName: any, tilesData: any, container: any) => {
     // THREE INIT
     // =====================================================
 
+    const width = 172;
+    const height = 172;
+
     const scene = new THREE.Scene();
 
     const camera = new THREE.OrthographicCamera(
-        window.innerWidth / -2,
-        window.innerWidth / 2,
-        window.innerHeight / -2,
-        window.innerHeight / 2,
+        width / -2,
+        width / 2,
+        height / -2,
+        height / 2,
         0.1,
         10000
     );
@@ -48,7 +51,7 @@ export default(mapName: any, tilesData: any, container: any) => {
         premultipliedAlpha: false,
     }
     const renderer = new THREE.WebGLRenderer(rendererParametres);
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(width, height);
     renderer.setClearColor(0x000000, 0);
     renderer.autoClear = true;
     const rendererElement = renderer.domElement;
@@ -150,8 +153,8 @@ export default(mapName: any, tilesData: any, container: any) => {
         // const size = TILE_SIZE * scale;
         const size = TILE_SIZE;
 
-        const hw = window.innerWidth / 2;
-        const hh = window.innerHeight / 2;
+        const hw = width / 2;
+        const hh = height / 2;
 
         const left = camX - hw;
         const right = camX + hw;
@@ -221,62 +224,62 @@ export default(mapName: any, tilesData: any, container: any) => {
     let rotX = 0;
     let rotY = 0;
 
-    window.addEventListener("mousedown", (event) => {
-        lastX = event.clientX;
-        lastY = event.clientY;
+    // window.addEventListener("mousedown", (event) => {
+    //     lastX = event.clientX;
+    //     lastY = event.clientY;
         
-        if (event.shiftKey) {
-            rotating = true;
-        } else {
-            dragging = true;
-        }
-    });
+    //     if (event.shiftKey) {
+    //         rotating = true;
+    //     } else {
+    //         dragging = true;
+    //     }
+    // });
 
-    window.addEventListener("mouseup", (event) => {
-        dragging = false;
-        rotating = false;
-    });
+    // window.addEventListener("mouseup", (event) => {
+    //     dragging = false;
+    //     rotating = false;
+    // });
 
-    window.addEventListener("mousemove", (event) => {
+    // window.addEventListener("mousemove", (event) => {
 
-        if (!dragging && !rotating) {
-            return;
-        }
+    //     if (!dragging && !rotating) {
+    //         return;
+    //     }
 
-        // camX -= (e.clientX - lastX);
-        // camY += (e.clientY - lastY);
+    //     // camX -= (e.clientX - lastX);
+    //     // camY += (e.clientY - lastY);
 
-        // lastX = e.clientX;
-        // lastY = e.clientY;
-        const dx = event.clientX - lastX;
-        const dy = event.clientY - lastY;
+    //     // lastX = e.clientX;
+    //     // lastY = e.clientY;
+    //     const dx = event.clientX - lastX;
+    //     const dy = event.clientY - lastY;
 
-        if (dragging) {
-            camX -= dx;
-            camY += dy;
-        }
+    //     if (dragging) {
+    //         camX -= dx;
+    //         camY += dy;
+    //     }
 
-        if (rotating) {
-            rotY += dx * 0.005;
-            rotX += dy * 0.005;
+    //     if (rotating) {
+    //         rotY += dx * 0.005;
+    //         rotX += dy * 0.005;
 
-            // ограничим наклон
-            rotX = Math.max(-1.2, Math.min(1.2, rotX));
-        }
+    //         // ограничим наклон
+    //         rotX = Math.max(-1.2, Math.min(1.2, rotX));
+    //     }
 
-        lastX = event.clientX;
-        lastY = event.clientY;
-    });
+    //     lastX = event.clientX;
+    //     lastY = event.clientY;
+    // });
 
-    window.addEventListener("resize", (event) => {
-        const width = window.innerWidth;
-        const height = window.innerHeight;
+    // window.addEventListener("resize", (event) => {
+    //     const width = width;
+    //     const height = height;
 
-        camera.aspect = width / height;
-        camera.updateProjectionMatrix();
+    //     camera.aspect = width / height;
+    //     camera.updateProjectionMatrix();
 
-        renderer.setSize(width, height);
-    });
+    //     renderer.setSize(width, height);
+    // });
 
     // =====================================================
     // RENDER LOOP (ANIMATION MAGIC)
@@ -315,10 +318,10 @@ export default(mapName: any, tilesData: any, container: any) => {
             updateLayer(zHigh, highAlpha);
         }
 
-        camera.left = -window.innerWidth / 2 + camX;
-        camera.right = window.innerWidth / 2 + camX;
-        camera.top = window.innerHeight / 2 + camY;
-        camera.bottom = -window.innerHeight / 2 + camY;
+        camera.left = -width / 2 + camX;
+        camera.right = width / 2 + camX;
+        camera.top = height / 2 + camY;
+        camera.bottom = -height / 2 + camY;
         container.style.transform = `
             rotateX(${rotX}rad)
             rotateY(${rotY}rad)

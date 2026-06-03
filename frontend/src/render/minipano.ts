@@ -6,9 +6,9 @@ export default (panoName: any, tilesData: any, container: any) => {
     // =========================================
     // CONFIG
     // =========================================
-    const TILE_PATH = `${PATH}/3852/tiles`;
+    const TILE_PATH = `${PATH}/360/tiles`;
 
-    const TILE_SIZE = 214;
+    const TILE_SIZE = 20;
 
     const COLS = 18;   // 9216 / 512
     const ROWS = 9;    // 4608 / 512
@@ -16,11 +16,15 @@ export default (panoName: any, tilesData: any, container: any) => {
     // =========================================
     // SCENE
     // =========================================
+
+    const width = 172;
+    const height = 172;
+
     const scene = new THREE.Scene();
 
     const camera = new THREE.PerspectiveCamera(
         75,
-        window.innerWidth / window.innerHeight,
+        width / height,
         0.1,
         2000
     );
@@ -31,7 +35,7 @@ export default (panoName: any, tilesData: any, container: any) => {
         antialias: true
     });
 
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(width, height);
     container.appendChild(renderer.domElement);
 
 
@@ -134,42 +138,42 @@ export default (panoName: any, tilesData: any, container: any) => {
     let minFov = 40;
     let maxFov = 100;
 
-    window.addEventListener("mousedown", e => {
-        dragging = true;
-        rotating = false;
-        lastX = e.clientX;
-        lastY = e.clientY;
-    });
+    // window.addEventListener("mousedown", e => {
+    //     dragging = true;
+    //     rotating = false;
+    //     lastX = e.clientX;
+    //     lastY = e.clientY;
+    // });
 
-    window.addEventListener("mouseup", () => {
-        dragging = false;
-    });
+    // window.addEventListener("mouseup", () => {
+    //     dragging = false;
+    // });
 
-    window.addEventListener("mousemove", e => {
+    // window.addEventListener("mousemove", e => {
 
-        if (!dragging) return;
+    //     if (!dragging) return;
 
-        lon -= (e.clientX - lastX) * 0.1;
-        lat += (e.clientY - lastY) * 0.1;
+    //     lon -= (e.clientX - lastX) * 0.1;
+    //     lat += (e.clientY - lastY) * 0.1;
 
-        lat = Math.max(-85, Math.min(85, lat));
+    //     lat = Math.max(-85, Math.min(85, lat));
 
-        lastX = e.clientX;
-        lastY = e.clientY;
-    });
+    //     lastX = e.clientX;
+    //     lastY = e.clientY;
+    // });
 
-    window.addEventListener("wheel", (e) => {
+    // window.addEventListener("wheel", (e) => {
 
-        camera.fov += e.deltaY * 0.05;
+    //     camera.fov += e.deltaY * 0.05;
 
-        camera.fov = THREE.MathUtils.clamp(
-            camera.fov,
-            minFov,
-            maxFov
-        );
+    //     camera.fov = THREE.MathUtils.clamp(
+    //         camera.fov,
+    //         minFov,
+    //         maxFov
+    //     );
 
-        camera.updateProjectionMatrix();
-    });
+    //     camera.updateProjectionMatrix();
+    // });
 
 
     // =========================================
@@ -180,9 +184,9 @@ export default (panoName: any, tilesData: any, container: any) => {
 
         requestAnimationFrame(animate);
 
-        if (rotating) {
+        // if (rotating) {
             lon += 0.05;
-        }
+        // }
 
         const phi =
             THREE.MathUtils.degToRad(90 - lat);
@@ -209,14 +213,14 @@ export default (panoName: any, tilesData: any, container: any) => {
     window.addEventListener("resize", () => {
 
         camera.aspect =
-            window.innerWidth /
-            window.innerHeight;
+            width /
+            height;
 
         camera.updateProjectionMatrix();
 
         renderer.setSize(
-            window.innerWidth,
-            window.innerHeight
+            width,
+            height
         );
     });
 }
