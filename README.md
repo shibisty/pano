@@ -88,7 +88,7 @@ Install dependencies and build production assets:
 ```bash
 cd frontend
 npm install
-npm run dev
+npm run build
 ```
 
 Example of http server:

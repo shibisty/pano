@@ -49,7 +49,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	jsonResponse(w, Response{
 		Page:  "home",
 		Title: T["home"],
-	})s
+	})
 }
 
 func aboutHandler(w http.ResponseWriter, r *http.Request) {
