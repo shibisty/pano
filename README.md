@@ -1,5 +1,7 @@
 # Simple Map Engine (Three.js)
 
+[![Patreon](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/cw/shibisty)
+
 This is an example of a simple tile-based map engine built with **Three.js**.
 
 It demonstrates how to render and interact with large tiled maps using WebGL, including zooming, panning, and multi-resolution tile loading.
@@ -114,3 +116,7 @@ cd backend
 go build
 ./sme-http.exe
 ```
+
+[![Patreon](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/cw/shibisty)
+
+If this project helps you, consider supporting its development on Patreon ❤️
